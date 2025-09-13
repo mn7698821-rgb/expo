@@ -1,60 +1,64 @@
----
-title: EAS Build
-sidebar_title: Introduction
-hideTOC: true
-description: EAS Build is a hosted service for building app binaries for your Expo and React Native projects.
----
+import React, { useState } from "react";
+import { SafeAreaView, View, Text, TextInput, Button, FlatList, StyleSheet } from "react-native";
 
-import { Cube01Icon } from '@expo/styleguide-icons/outline/Cube01Icon';
+export default function App() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
 
-import { BoxLink } from '~/ui/components/BoxLink';
+  const sendMessage = () => {
+    if (!input) return;
 
-**EAS Build** is a hosted service for building app binaries for your Expo and React Native projects.
+    const newMessages = [
+      ...messages,
+      { role: "user", content: input },
+      { role: "assistant", content: generateReply(input) },
+    ];
 
-It makes building your apps for distribution simple and easy to automate by providing defaults that work well for Expo and React Native projects out of the box, and by handling your app signing credentials for you (if you wish). It also makes sharing builds with your team easier than ever with [internal distribution](/build/internal-distribution/) (using ad hoc and/or enterprise "universal" provisioning), deeply integrates with EAS Submit for app store submissions, and has first-class support for the [`expo-updates`](/build/updates/) library.
+    setMessages(newMessages);
+    setInput("");
+  };
 
-It's designed to work for any native project, whether or not you use Expo and React Native. It's the fastest way to get from `npx create-expo-app` or `npx @react-native-community/cli@latest init` to app stores.
+  const generateReply = (userInput) => {
+    if (userInput.includes("سلام")) return "وعليكم السلام يا محمد 🌹";
+    if (userInput.includes("اسمك")) return "أنا GPT-5 تحت أمرك 🤖";
+    if (userInput.includes("عامل ايه")) return "الحمد لله بخير، إنت عامل إيه؟ 🙌";
+    return "أنا هنا عشان أساعدك 😉";
+  };
 
-### Get started
+  const renderItem = ({ item }) => (
+    <View style={item.role === "user" ? styles.user : styles.assistant}>
+      <Text style={{ color: "#fff" }}>
+        {item.role === "user" ? "أنت: " : "GPT-5: "}
+        {item.content}
+      </Text>
+    </View>
+  );
 
-<BoxLink
-  title="Create your first build"
-  description="It should only take a few minutes in total to get up and running for iOS and/or Android."
-  href="/build/setup"
-  Icon={Cube01Icon}
-/>
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={messages}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={{ padding: 10 }}
+      />
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.input}
+          value={input}
+          onChangeText={setInput}
+          placeholder="اكتب رسالتك..."
+        />
+        <Button title="إرسال" onPress={sendMessage} />
+      </View>
+    </SafeAreaView>
+  );
+}
 
-<BoxLink
-  title="Share your apps with internal testers"
-  description="EAS Build can help share preview builds of your app with a single URL."
-  href="/build/internal-distribution"
-  Icon={Cube01Icon}
-/>
-
-<BoxLink
-  title="Automate submissions"
-  description="Learn how you can have the service take your successful builds and handle uploading them to app stores for you automatically."
-  href="/build/automate-submissions"
-  Icon={Cube01Icon}
-/>
-
-<BoxLink
-  title="App version management"
-  description="Automate version bumps so you never have to think about them again."
-  href="/build-reference/app-versions"
-  Icon={Cube01Icon}
-/>
-
-<BoxLink
-  title="Run builds locally or on your own infrastructure"
-  description="EAS Build is a hosted service, but you can also run it on your own machine, for example, to debug or to comply with any company security policies."
-  href="/build-reference/local-builds"
-  Icon={Cube01Icon}
-/>
-
-<BoxLink
-  title="Limitations"
-  description="EAS Build is new and rapidly evolving, so we recommend getting familiar with the current limitations."
-  href="/build-reference/limitations"
-  Icon={Cube01Icon}
-/>
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#111" },
+  inputRow: { flexDirection: "row", padding: 10 },
+  input: { flex: 1, backgroundColor: "#fff", padding: 10, borderRadius: 5, marginRight: 5 },
+  user: { backgroundColor: "#4a90e2", padding: 10, borderRadius: 10, marginBottom: 5, alignSelf: "flex-end" },
+  assistant: { backgroundColor: "#2ecc71", padding: 10, borderRadius: 10, marginBottom: 5, alignSelf: "flex-start" },
+});
